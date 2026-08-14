@@ -1,0 +1,29 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary downloads & runtime artifacts
+temp_downloads/
+*.mp4
+*.m4a
+*.webm
+*.temp
+*.log
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables & OS files
+.env
+.DS_Store
+Thumbs.db

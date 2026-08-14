@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaTube Downloader | Baixar Reels e Vídeos do YouTube</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/download--v1.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background glowing shapes for premium glassmorphism effect -->
+    <div class="glow-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <main class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-wrapper">
+                <svg class="reels-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 17L7 12H10V7H14V12H17L12 17Z" fill="url(#instatube-gradient)"/>
+                    <defs>
+                        <linearGradient id="instatube-gradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#FF0000" />
+                            <stop offset="40%" stop-color="#dc2743" />
+                            <stop offset="70%" stop-color="#cc2366" />
+                            <stop offset="100%" stop-color="#f09433" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h1>InstaTube <span>Downloader</span></h1>
+            <p class="subtitle">Baixe vídeos do Instagram Reels e do YouTube em alta qualidade de forma rápida e gratuita.</p>
+        </header>
+
+        <!-- Downloader Card -->
+        <section class="card glass-panel" id="downloader-card">
+            <!-- Form State -->
+            <form id="download-form" class="form-container">
+                <div class="input-group">
+                    <div class="input-icon-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                    </div>
+                    <input 
+                        type="url" 
+                        id="reel-url" 
+                        placeholder="Cole o link do Reels ou YouTube (ex: https://www.youtube.com/watch?v=...)" 
+                        required 
+                        autocomplete="off"
+                    >
+                    <button type="button" id="paste-btn" class="icon-btn" title="Colar link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                        </svg>
+                    </button>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn btn-primary">
+                    <span>Analisar Link</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container hidden">
+                <div class="spinner">
+                    <div class="double-bounce1"></div>
+                    <div class="double-bounce2"></div>
+                </div>
+                <p class="loading-text">Analisando o link...</p>
+                <p class="sub-loading-text">Isso pode levar alguns segundos dependendo do servidor da plataforma.</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-container hidden">
+                <div class="error-icon-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 class="error-title">Ops! Ocorreu um erro</h3>
+                <p id="error-message" class="error-text">O link fornecido parece ser inválido ou o conteúdo é privado.</p>
+                <button type="button" id="error-back-btn" class="btn btn-secondary">Tentar Novamente</button>
+            </div>
+
+            <!-- Success Preview State -->
+            <div id="preview-state" class="preview-container hidden">
+                <div class="preview-card">
+                    <div class="thumbnail-wrapper">
+                        <img id="preview-thumbnail" src="" alt="Thumbnail do Vídeo">
+                        <div id="preview-duration" class="duration-badge">00:00</div>
+                    </div>
+                    <div class="preview-details">
+                        <h3 class="preview-title" id="preview-title">Título do Vídeo</h3>
+                        <p class="preview-subtitle">Pronto para download!</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" id="download-btn" class="btn btn-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Baixar Vídeo (MP4)</span>
+                    </button>
+                    <button type="button" id="reset-btn" class="btn btn-outline">
+                        <span>Baixar Outro</span>
+                    </button>
+                </div>
+                
+                <div id="download-progress-container" class="download-progress-container hidden">
+                    <div class="progress-bar-wrapper">
+                        <div id="download-progress-bar" class="progress-bar"></div>
+                    </div>
+                    <p class="progress-text">Iniciando download... Por favor, não feche esta página.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructions / Features Section -->
+        <section class="info-section">
+            <div class="info-grid">
+                <div class="info-item glass-panel">
+                    <div class="info-icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </div>
+                    <h3>Qualidade Máxima</h3>
+                    <p>Baixe os vídeos na melhor qualidade de áudio e vídeo disponível.</p>
+                </div>
+                <div class="info-item glass-panel">
+                    <div class="info-icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3>Seguro & Privado</h3>
+                    <p>Não coletamos seus dados. Os downloads são diretos e limpos.</p>
+                </div>
+                <div class="info-item glass-panel">
+                    <div class="info-icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                        </svg>
+                    </div>
+                    <h3>Sem Limites</h3>
+                    <p>Baixe quantos vídeos quiser, sem anúncios invasivos ou marcas d'água adicionais.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Criado localmente com carinho &copy; 2026. Este site não é afiliado ao Instagram, Meta, YouTube ou Google.</p>
+        </footer>
+    </main>
+
+    <!-- JS Logic -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
