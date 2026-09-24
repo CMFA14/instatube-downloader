@@ -1,7 +1,7 @@
 @echo off
-title Downloader de Reels do Instagram
+title InstaTube Downloader (Instagram & YouTube)
 echo ===================================================
-echo   Configurando o Downloader de Reels do Instagram  
+echo   Configurando o InstaTube Downloader
 echo ===================================================
 echo.
 
@@ -9,12 +9,13 @@ echo.
 python --version >nul 2>&1
 if errorlevel 1 goto nopython
 
-:: Criar ambiente virtual se nao existir
-if not exist .venv goto create_venv
+:: Criar ambiente virtual se nao existir ou estiver incompleto
+if not exist .venv\Scripts\python.exe goto create_venv
 goto activate_venv
 
 :create_venv
-echo [+] Criando ambiente virtual Python (.venv)...
+echo [+] Configurando ambiente virtual Python (.venv)...
+if exist .venv rmdir /s /q .venv 2>nul
 python -m venv .venv
 if errorlevel 1 goto venv_error
 goto activate_venv
@@ -30,9 +31,9 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 if errorlevel 1 goto pip_error
 
-:: Garantir que o yt-dlp esteja na versao mais recente (evita erros com mudancas no Instagram)
+:: Garantir que o yt-dlp esteja sempre na versao mais recente
 echo [+] Atualizando yt-dlp...
-pip install -U yt-dlp
+pip install -U yt-dlp imageio-ffmpeg
 
 echo.
 echo ===================================================

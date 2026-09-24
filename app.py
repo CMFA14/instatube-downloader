@@ -15,6 +15,17 @@ app = Flask(__name__)
 TEMP_DIR = os.path.join(tempfile.gettempdir(), 'instatube_downloader')
 os.makedirs(TEMP_DIR, exist_ok=True)
 
+def get_ffmpeg_path():
+    try:
+        import imageio_ffmpeg
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        if exe and os.path.exists(exe):
+            return exe
+    except Exception:
+        pass
+    import shutil
+    return shutil.which('ffmpeg')
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -31,18 +42,17 @@ def get_info():
 
     logger.info(f"Fetching info for URL: {url}")
     
+    ffmpeg_exe = get_ffmpeg_path()
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
         'nocheckcertificate': True,
-        'rm_cache_dir': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['web_embedded', 'mweb', 'default', '-android_sdkless']
-            }
-        }
+        'js_runtimes': {'node': {}},
+        'remote_components': ['ejs:github'],
     }
+    if ffmpeg_exe:
+        ydl_opts['ffmpeg_location'] = ffmpeg_exe
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -98,10 +108,9 @@ def download_video():
     file_id = str(uuid.uuid4())
     filepath = os.path.join(TEMP_DIR, f"{file_id}.%(ext)s")
     
-    import shutil
-    has_ffmpeg = shutil.which('ffmpeg') is not None
-    logger.info(f"FFmpeg detected: {has_ffmpeg}")
-    format_str = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' if has_ffmpeg else 'best[ext=mp4]/best'
+    ffmpeg_exe = get_ffmpeg_path()
+    logger.info(f"FFmpeg path: {ffmpeg_exe}")
+    format_str = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best' if ffmpeg_exe else 'best[ext=mp4]/best'
 
     ydl_opts = {
         'outtmpl': filepath,
@@ -109,13 +118,12 @@ def download_video():
         'quiet': True,
         'no_warnings': True,
         'nocheckcertificate': True,
-        'rm_cache_dir': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['web_embedded', 'mweb', 'default', '-android_sdkless']
-            }
-        }
+        'js_runtimes': {'node': {}},
+        'remote_components': ['ejs:github'],
+        'merge_output_format': 'mp4',
     }
+    if ffmpeg_exe:
+        ydl_opts['ffmpeg_location'] = ffmpeg_exe
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
